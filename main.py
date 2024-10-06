@@ -2,6 +2,7 @@ import argparse
 import sys
 import json
 from pathlib import Path
+from google.protobuf.json_format import MessageToDict
 
 import device_policy
 import signer
@@ -10,8 +11,8 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   sub_parsers = parser.add_subparsers(dest="mode")
 
-  view_command = sub_parsers.add_parser("view", help="Read the device settings without modifying anything.")
-  view_command.add_argument("--device-policy", required=True, help="The path to the device policy file")
+  read_command = sub_parsers.add_parser("read", help="Read the device settings without modifying anything.")
+  read_command.add_argument("--device-policy", required=True, help="The path to the device policy file")
 
   patch_command = sub_parsers.add_parser("patch", help="Patch an existing device policy file.")
   patch_command.add_argument("--device-policy", required=True, help="The path to the device policy file")
@@ -28,8 +29,8 @@ if __name__ == "__main__":
   policy_bytes = Path(args.device_policy).expanduser().read_bytes()
   policy = device_policy.DevicePolicy(policy_bytes)
 
-  if args.mode == "view":
-    print(policy.device_settings)
+  if args.mode == "read":
+    print(json.dumps(MessageToDict(policy.device_settings,preserving_proto_field_name=True),indent=2))
 
   else:
     private_key = signer.new_private_key()
@@ -38,7 +39,7 @@ if __name__ == "__main__":
 
     if args.policy_json:
       policy_json = Path(args.policy_json).expanduser().read_text()
-      policy_dict = json.loads(policy_json)["chromePolicies"]
+      policy_dict = json.loads(policy_json)
       policy.import_policy(policy_dict)
 
     new_policy_data = policy.serialize_policy(private_key)

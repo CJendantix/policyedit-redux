@@ -1,5 +1,10 @@
 /data
 
+chromeos-files
+policy.*
+*.key
+policies.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
