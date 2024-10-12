@@ -14,11 +14,11 @@ if __name__ == "__main__":
   read_command = sub_parsers.add_parser("read", help="Read the device settings without modifying anything.")
   read_command.add_argument("--device-policy", required=True, help="The path to the device policy file")
 
-  patch_command = sub_parsers.add_parser("patch", help="Patch an existing device policy file.")
-  patch_command.add_argument("--device-policy", required=True, help="The path to the device policy file")
-  patch_command.add_argument("--public-key", required=True,  help="The path to the public key that will be generated")
-  patch_command.add_argument("--new-policy", required=True,  help="The modified policy file that is generated")
-  patch_command.add_argument("--policy-json", required=False, help="Import a policies.json file")
+  write_command = sub_parsers.add_parser("write", help="Patch an existing device policy file.")
+  write_command.add_argument("--device-policy", required=True, help="The path to the device policy file")
+  write_command.add_argument("--new-key", required=True,  help="The path to the public key that will be generated")
+  write_command.add_argument("--new-policy", required=True,  help="The modified policy file that is generated")
+  write_command.add_argument("--policy-json", required=False, help="Import a policies.json file")
 
   args = parser.parse_args()
 
@@ -30,12 +30,17 @@ if __name__ == "__main__":
   policy = device_policy.DevicePolicy(policy_bytes)
 
   if args.mode == "read":
-    print(json.dumps(MessageToDict(policy.device_settings,preserving_proto_field_name=True),indent=2))
+    print(
+      json.dumps(
+        MessageToDict(policy.device_settings,preserving_proto_field_name=True),
+        indent=2
+      )
+    )
 
-  else:
+  if args.mode == "write":
     private_key = signer.new_private_key()
     new_policy_path = Path(args.new_policy).expanduser()
-    public_key_path = Path(args.public_key).expanduser()
+    public_key_path = Path(args.new_key).expanduser()
 
     if args.policy_json:
       policy_json = Path(args.policy_json).expanduser().read_text()

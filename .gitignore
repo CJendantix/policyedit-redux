@@ -4,6 +4,7 @@ chromeos-files
 policy.*
 *.key
 policies.json
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
